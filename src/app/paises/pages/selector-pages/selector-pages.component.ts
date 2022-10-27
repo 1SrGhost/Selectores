@@ -4,6 +4,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { iPaisSmall, iPais } from '../../interfaces/paises.interface';
 import { PaisesServiceService } from '../../services/paises.service';
 import { switchMap, tap } from 'rxjs/operators';
+import { Name } from '../../../../../../03-paisesApp/src/app/pais/interfaces/pais.interface';
 
 @Component({
   selector: 'app-selector-pages',
@@ -18,10 +19,10 @@ export class SelectorPagesComponent implements OnInit {
   });
   regiones: string[] = [];
   paises: iPaisSmall[] = [];
-  fronteras: string[]= [];
+  fronteras: iPaisSmall []= [];
 
   cargando: boolean = false;
- 
+
   constructor(
     private fb: FormBuilder,
     private paisesServices: PaisesServiceService
@@ -35,14 +36,13 @@ export class SelectorPagesComponent implements OnInit {
     //     .getPaisesPorRegion(region)
     //       .subscribe((paises) => (this.paises = paises));
     // });
-    
+
     this.miFormulario
       .get('region')
       ?.valueChanges.pipe(
         tap((_) => {
           this.miFormulario.get('pais')?.reset('');
           this.cargando = true;
-
         }),
         switchMap((region) => this.paisesServices.getPaisesPorRegion(region))
       )
@@ -53,18 +53,20 @@ export class SelectorPagesComponent implements OnInit {
 
     this.miFormulario
       .get('pais')
-      ?.valueChanges.pipe( tap((_) => {
-        this.fronteras = [];
-        this.cargando = true;
-/* Restableciendo el valor de la frontera y habilitándolo. */
-        // this.miFormulario.get('frontera')?.reset('');
-        // this.miFormulario.get('frontera')?.enable();
-      }),
-        switchMap((codigo) => this.paisesServices.getPaisporCodigo(codigo))
+      ?.valueChanges.pipe(
+        tap((_) => {
+          this.fronteras = [];
+          this.cargando = true;
+          /* Restableciendo el valor de la frontera y habilitándolo. */
+          // this.miFormulario.get('frontera')?.reset('');
+          // this.miFormulario.get('frontera')?.enable();
+        }),
+        switchMap((codigo) => this.paisesServices.getPaisporCodigo(codigo)),
+        switchMap((pais) => this.paisesServices.getArrayFronteras(pais?.borders!))
       )
 
       .subscribe((data) => {
-        this.fronteras = data?.borders || [];
+        this.fronteras = data;
         this.cargando = false;
       });
   }
