@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { PaisSmall } from '../interfaces/paises.interface';
-import { Observable } from 'rxjs';
+import { iPaisSmall, iPais } from '../interfaces/paises.interface';
+import { Observable, of } from 'rxjs';
 
 
 @Injectable({
@@ -22,8 +22,16 @@ export class PaisesServiceService {
   * @param {string} region - La región de la que desea obtener los países.
   * @returns Un Observable de tipo any.
   */
-  getPaisesPorRegion(region: string): Observable<PaisSmall[]>{
+  getPaisesPorRegion(region: string): Observable<iPaisSmall[]>{
     const url: string = `${this._baseUrl}/region/${region}?fields=alpha3Code,name`
-    return this.http.get<PaisSmall[]>(url);
+    return this.http.get<iPaisSmall[]>(url);
+  }
+
+  getPaisporCodigo(codigo:string):Observable<iPais | null>  {
+    if(!codigo){
+      return of(null)
+    }
+    const url = `${this._baseUrl}/alpha/${codigo}`;
+    return this.http.get<iPais>(url);
   }
 }
